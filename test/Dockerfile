@@ -4,7 +4,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/riscv/riscv-gnu-toolchain \
-    && cd riscv-gnu-toolchain && ./configure --prefix=/opt/riscv \
+    && cd riscv-gnu-toolchain && ./configure --prefix=/opt/riscv --with-arch=rv32gc \
     && make -j$(nproc) \
     && make install \
     && cd ../ && rm -rf riscv-gnu-toolchain
