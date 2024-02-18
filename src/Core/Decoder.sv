@@ -88,10 +88,16 @@ always_comb begin
                 op2_src : OP2Src::IMM,
                 en : 1
             };
-            micro_code.br_unit = '{
-                funct : BranchUnitFuncts::JALR,
-                en : 1
-            };
+            micro_code.br_unit.en = 1;
+            unique case(inst.Itype.funct3)
+                3'b000 : micro_code.br_unit.funct = BranchUnitFuncts::BEQ;
+                3'b001 : micro_code.br_unit.funct = BranchUnitFuncts::BNE;
+                3'b100 : micro_code.br_unit.funct = BranchUnitFuncts::BLT;
+                3'b101 : micro_code.br_unit.funct = BranchUnitFuncts::BGE;
+                3'b110 : micro_code.br_unit.funct = BranchUnitFuncts::BLTU;
+                3'b111 : micro_code.br_unit.funct = BranchUnitFuncts::BGEU;
+                default : micro_code.br_unit.funct = 'x;
+            endcase
             micro_code.ld_st_unit.en = 0;
             micro_code.csr_unit.en = 0;
         end

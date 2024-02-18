@@ -14,7 +14,7 @@ Disassembly of section .text:
   18:	0ff77713          	zext.b	a4,a4
   1c:	00e78023          	sb	a4,0(a5)
   20:	00108093          	addi	ra,ra,1
-  24:	01f00793          	li	a5,31
+  24:	00900793          	li	a5,9
   28:	fe17d0e3          	bge	a5,ra,8 <entry+0x8>
   2c:	fd5ff06f          	j	0 <entry>
 

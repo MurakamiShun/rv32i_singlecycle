@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
 
     std::cout << "cycles, PC, wen, waddr, wdata" << std::endl;
 
-    const auto sim_cycles = 20;
+    const auto sim_cycles = 150;
     // -- reset --
     top->clk = 0;
     top->rst_n = 0;

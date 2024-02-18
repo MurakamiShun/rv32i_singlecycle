@@ -69,6 +69,7 @@ ALU alu(
     .result(alu_result)
 );
 BranchUnit br_unit(
+    .en(micro_code.br_unit.en),
     .op1(rs1_data),
     .op2(rs2_data),
     .funct(micro_code.br_unit.funct),
@@ -122,7 +123,7 @@ end
 always_ff@(posedge clk or negedge rst_n)begin
     if(!rst_n)begin
         pc <= 0;
-    end else if(micro_code.br_unit.en && br_token)begin
+    end else if(br_token)begin
         pc <= alu_result;
     end else begin
         pc <= pc4;
