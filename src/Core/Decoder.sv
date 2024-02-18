@@ -53,7 +53,7 @@ always_comb begin
             micro_code.rd_src = RdSrc::PC4;
             micro_code.alu = '{
                 funct : ALUFuncts::ADD,
-                op1_src : OP1Src::ZERO,
+                op1_src : OP1Src::PC,
                 op2_src : OP2Src::IMM,
                 en : 1
             };

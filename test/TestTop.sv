@@ -1,7 +1,10 @@
 module TestTop(
     input logic clk,
     input logic rst_n,
-    output logic[31:0] pc
+    output logic[31:0] pc,
+    output logic[31:0] waddr,
+    output logic[31:0] wdata,
+    output logic wen
 );
 
 AXI4LiteReadIF inst_bus(clk, rst_n);
@@ -29,6 +32,9 @@ always_comb begin
     inst_bus.ready = 1;
 
     pc = inst_bus.addr;
+    waddr = data_wbus.addr;
+    wdata = data_wbus.data;
+    wen = data_wbus.avalid;
 end
 
 endmodule

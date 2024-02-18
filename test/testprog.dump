@@ -1,0 +1,47 @@
+
+testprog.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <entry>:
+   0:	00000093          	li	ra,0
+   4:	0200006f          	j	24 <entry+0x24>
+   8:	0ff0f713          	zext.b	a4,ra
+   c:	20400793          	li	a5,516
+  10:	0007a783          	lw	a5,0(a5)
+  14:	03070713          	addi	a4,a4,48
+  18:	0ff77713          	zext.b	a4,a4
+  1c:	00e78023          	sb	a4,0(a5)
+  20:	00108093          	addi	ra,ra,1
+  24:	01f00793          	li	a5,31
+  28:	fe17d0e3          	bge	a5,ra,8 <entry+0x8>
+  2c:	fd5ff06f          	j	0 <entry>
+
+Disassembly of section .comment:
+
+00000000 <.comment>:
+   0:	3a434347          	.insn	4, 0x3a434347
+   4:	2820                	.insn	2, 0x2820
+   6:	2029                	.insn	2, 0x2029
+   8:	3331                	.insn	2, 0x3331
+   a:	322e                	.insn	2, 0x322e
+   c:	302e                	.insn	2, 0x302e
+	...
+
+Disassembly of section .riscv.attributes:
+
+00000000 <.riscv.attributes>:
+   0:	1b41                	.insn	2, 0x1b41
+   2:	0000                	.insn	2, 0x
+   4:	7200                	.insn	2, 0x7200
+   6:	7369                	.insn	2, 0x7369
+   8:	01007663          	bgeu	zero,a6,14 <entry+0x14>
+   c:	0011                	.insn	2, 0x0011
+   e:	0000                	.insn	2, 0x
+  10:	1004                	.insn	2, 0x1004
+  12:	7205                	.insn	2, 0x7205
+  14:	3376                	.insn	2, 0x3376
+  16:	6932                	.insn	2, 0x6932
+  18:	7032                	.insn	2, 0x7032
+  1a:	0031                	.insn	2, 0x0031
