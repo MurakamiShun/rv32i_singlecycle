@@ -32,11 +32,12 @@ package OP2Src;
 endpackage
 
 package RdSrc;
-    typedef enum logic[1:0] {
+    typedef enum logic[2:0] {
         ALU,
         CSR,
         LD,
-        PC4
+        PC4,
+        NotUsed
     } Type;
 endpackage
 

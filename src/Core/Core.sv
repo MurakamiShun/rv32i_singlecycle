@@ -86,7 +86,7 @@ always_comb begin
     endcase
 end
 
-SysTimerIF sys_timer_if;
+SysTimerIF sys_timer_if();
 
 CSRUnit csr_unit(
     .en(micro_code.csr_unit.en),
@@ -120,7 +120,7 @@ always_comb begin
     endcase
 end
 
-always_ff@(posedge clk or negedge rst_n)begin
+always_ff@(posedge clk)begin
     if(!rst_n)begin
         pc <= 0;
     end else if(br_token)begin

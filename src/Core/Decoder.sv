@@ -19,6 +19,30 @@ enum logic[3:0] {
     IllegalType
 } inst_type;
 
+localparam type(micro_code.alu) alu_disable = '{
+    funct : ALUFuncts::Unknown,
+    op1_src : OP1Src::RS1,
+    op2_src : OP2Src::RS2,
+    en : 0
+};
+
+localparam type(micro_code.br_unit) br_disable = '{
+    funct : BranchUnitFuncts::Unknown,
+    en : 0
+};
+
+localparam type(micro_code.ld_st_unit) ld_st_disable = '{
+    funct : LoadStoreUnitFuncts::Unknown,
+    bytes : LoadStoreUnitBytes::Unknown,
+    en : 0
+};
+
+localparam type(micro_code.csr_unit) csr_disable = '{
+    funct : CSRUnitFuncts::ReadWrite,
+    rs1_src : RS1Src::REG,
+    en : 0
+};
+
 // depend on opcode
 always_comb begin
     unique case(inst.common.opcode)
@@ -31,9 +55,9 @@ always_comb begin
                 op2_src : OP2Src::IMM,
                 en : 1
             };
-            micro_code.ld_st_unit.en = 0;
-            micro_code.br_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.br_unit = br_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b00101_11 : begin // AUIPC
             inst_type = UType;
@@ -44,9 +68,9 @@ always_comb begin
                 op2_src : OP2Src::IMM,
                 en : 1
             };
-            micro_code.ld_st_unit.en = 0;
-            micro_code.br_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.br_unit = br_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b11011_11 : begin // JAL
             inst_type = JType;
@@ -61,8 +85,8 @@ always_comb begin
                 funct : BranchUnitFuncts::JAL,
                 en : 1
             };
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b11001_11 : begin // JALR
             inst_type = IType;
@@ -77,11 +101,12 @@ always_comb begin
                 funct : BranchUnitFuncts::JALR,
                 en : 1
             };
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b11000_11 : begin // Branch
             inst_type = BType;
+            micro_code.rd_src = RdSrc::NotUsed;
             micro_code.alu = '{
                 funct : ALUFuncts::ADD,
                 op1_src : OP1Src::PC,
@@ -96,10 +121,10 @@ always_comb begin
                 3'b101 : micro_code.br_unit.funct = BranchUnitFuncts::BGE;
                 3'b110 : micro_code.br_unit.funct = BranchUnitFuncts::BLTU;
                 3'b111 : micro_code.br_unit.funct = BranchUnitFuncts::BGEU;
-                default : micro_code.br_unit.funct = 'x;
+                default: micro_code.br_unit.funct = BranchUnitFuncts::Unknown;
             endcase
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b00000_11 : begin // Load
             inst_type = IType;
@@ -110,7 +135,6 @@ always_comb begin
                 op2_src : OP2Src::IMM,
                 en : 1
             };
-            micro_code.br_unit.en = 0;
             unique case(inst.Itype.funct3[2])
                 1'b1 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LD;
                 1'b0 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LDU;
@@ -122,17 +146,18 @@ always_comb begin
                 default: micro_code.ld_st_unit.bytes = LoadStoreUnitBytes::Unknown;
             endcase
             micro_code.ld_st_unit.en = 1;
-            micro_code.csr_unit.en = 0;
+            micro_code.br_unit = br_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b01000_11 : begin // Store
             inst_type = SType;
+            micro_code.rd_src = RdSrc::NotUsed;
             micro_code.alu = '{
                 funct : ALUFuncts::ADD,
                 op1_src : OP1Src::RS1,
                 op2_src : OP2Src::IMM,
                 en : 1
             };
-            micro_code.br_unit.en = 0;
             micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::ST;
             unique case(inst.Stype.funct3[1:0])
                 2'b00 : micro_code.ld_st_unit.bytes = LoadStoreUnitBytes::BYTE;
@@ -141,7 +166,8 @@ always_comb begin
                 default: micro_code.ld_st_unit.bytes = LoadStoreUnitBytes::Unknown;
             endcase
             micro_code.ld_st_unit.en = 1;
-            micro_code.csr_unit.en = 0;
+            micro_code.br_unit = br_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b00100_11 : begin // Imm-Reg Arithmetic
             if(inst.Itype.funct3 inside {3'b001, 3'b101, 3'b101})begin
@@ -165,9 +191,9 @@ always_comb begin
             micro_code.alu.op1_src = OP1Src::RS1;
             micro_code.alu.op2_src = OP2Src::IMM;
             micro_code.alu.en = 1;
-            micro_code.br_unit.en = 0;
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.br_unit = br_disable;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b01100_11 : begin // Reg-Reg Arithmetic
             inst_type = RType;
@@ -188,9 +214,9 @@ always_comb begin
             micro_code.alu.op1_src = OP1Src::RS1;
             micro_code.alu.op2_src = OP2Src::RS2;
             micro_code.alu.en = 1;
-            micro_code.br_unit.en = 0;
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.br_unit = br_disable;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
         7'b11100_11 : begin // CSR, ECALL or EBREAK
             inst_type = CSRType;
@@ -199,9 +225,9 @@ always_comb begin
                 1'b1 : micro_code.csr_unit.rs1_src = RS1Src::ADDR;
             endcase
             micro_code.rd_src = RdSrc::CSR;
-            micro_code.alu.en = 0;
-            micro_code.br_unit.en = 0;
-            micro_code.ld_st_unit.en = 0;
+            micro_code.alu = alu_disable;
+            micro_code.br_unit = br_disable;
+            micro_code.ld_st_unit = ld_st_disable;
             unique case(inst.CSRtype.funct3[1:0])
                 2'b00 : micro_code.csr_unit.funct = CSRUnitFuncts::ECallEBreak;
                 2'b01 : micro_code.csr_unit.funct = CSRUnitFuncts::ReadWrite;
@@ -212,22 +238,25 @@ always_comb begin
         end
         7'b00011_11 : begin // fence or fence.i
             inst_type = FenceType;
-            micro_code.alu.en = 0;
-            micro_code.br_unit.en = 0;
+            micro_code.rd_src = RdSrc::NotUsed;
+            micro_code.alu = alu_disable;
+            micro_code.br_unit = br_disable;
             unique case(inst.Itype.funct3)
                 3'b000 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::FENCE;
                 3'b001 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::FENCEI;
                 default : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::Unknown;
             endcase
+            micro_code.ld_st_unit.bytes = LoadStoreUnitBytes::Unknown;
             micro_code.ld_st_unit.en = 1;
-            micro_code.csr_unit.en = 0;
+            micro_code.csr_unit = csr_disable;
         end
         default: begin
             inst_type = IllegalType;
-            micro_code.alu.en = 0;
-            micro_code.br_unit.en = 0;
-            micro_code.ld_st_unit.en = 0;
-            micro_code.csr_unit.en = 0;
+            micro_code.rd_src = RdSrc::NotUsed;
+            micro_code.alu = alu_disable;
+            micro_code.br_unit = br_disable;
+            micro_code.ld_st_unit = ld_st_disable;
+            micro_code.csr_unit = csr_disable;
         end
     endcase
 end
