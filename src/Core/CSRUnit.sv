@@ -21,45 +21,54 @@ typedef enum logic[11:0] {
 } CSRADDRS;
 
 always_comb begin
-    if(en)begin
-        unique case(addr)
-            CYCLE_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::CYCLE;
-                sys_timer_if.upper = 0;
-                out_data = sys_timer_if.data;
-            end
-            CYCLEH_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::CYCLE;
-                sys_timer_if.upper = 1;
-                out_data = sys_timer_if.data;
-            end
-            TIME_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::TIME;
-                sys_timer_if.upper = 0;
-                out_data = sys_timer_if.data;
-            end
-            TIMEH_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::TIME;
-                sys_timer_if.upper = 1;
-                out_data = sys_timer_if.data;
-            end
-            INSTRET_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::INSTRET;
-                sys_timer_if.upper = 0;
-                out_data = sys_timer_if.data;
-            end
-            INSTRETH_ADDR : begin
-                sys_timer_if.timer = SysTimerConsts::INSTRET;
-                sys_timer_if.upper = 1;
-                out_data = sys_timer_if.data;
-            end
-            default : begin
-                // illegal CSR addr
-            end
-        endcase
-    end else begin
+    if(!en)begin
         out_data = 0;
     end
+    else begin
+        unique case(addr)
+            CYCLE_ADDR    : out_data = sys_timer_if.data;
+            CYCLEH_ADDR   : out_data = sys_timer_if.data;
+            TIME_ADDR     : out_data = sys_timer_if.data;
+            TIMEH_ADDR    : out_data = sys_timer_if.data;
+            INSTRET_ADDR  : out_data = sys_timer_if.data;
+            INSTRETH_ADDR : out_data = sys_timer_if.data;
+            default       : out_data = 0;
+        endcase
+    end
+end
+
+// about sys_timer_if
+always_comb begin
+    unique case(addr)
+        CYCLE_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::CYCLE;
+            sys_timer_if.upper = 0;
+        end
+        CYCLEH_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::CYCLE;
+            sys_timer_if.upper = 1;
+        end
+        TIME_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::TIME;
+            sys_timer_if.upper = 0;
+        end
+        TIMEH_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::TIME;
+            sys_timer_if.upper = 1;
+        end
+        INSTRET_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::INSTRET;
+            sys_timer_if.upper = 0;
+        end
+        INSTRETH_ADDR : begin
+            sys_timer_if.timer = SysTimerConsts::INSTRET;
+            sys_timer_if.upper = 1;
+        end
+        default : begin
+            sys_timer_if.timer = SysTimerConsts::INSTRET;
+            sys_timer_if.upper = 1;
+        end
+    endcase
 end
 
 endmodule
