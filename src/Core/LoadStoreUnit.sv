@@ -14,8 +14,8 @@ module LoadStoreUnit(
 
 // write bus
 always_comb begin
-    w_bus.addr = addr;
     w_bus.valid = (en && funct == LoadStoreUnitFuncts::ST);
+    w_bus.addr = w_bus.valid ? addr : 32'h0;
     w_bus.data = wdata;
     unique case(bytes)
         LoadStoreUnitBytes::BYTE:begin
@@ -57,8 +57,8 @@ always_comb begin
     endcase
 end
 always_comb begin
-    r_bus.addr = {addr[31:2], 2'b0};
     r_bus.valid = (en && funct inside {LoadStoreUnitFuncts::LD, LoadStoreUnitFuncts::LDU});
+    r_bus.addr = r_bus.valid ? {addr[31:2], 2'b0} : 32'h0;
     unique case(funct)
         LoadStoreUnitFuncts::LD : begin
             unique case(bytes)
