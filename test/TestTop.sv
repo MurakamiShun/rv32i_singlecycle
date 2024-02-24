@@ -7,9 +7,9 @@ module TestTop(
     output logic wen
 );
 
-AXI4LiteReadIF inst_bus(clk, rst_n);
-AXI4LiteReadIF data_rbus(clk, rst_n);
-AXI4LiteWriteIF data_wbus(clk, rst_n);
+ReadIF inst_bus();
+ReadIF data_rbus();
+WriteIF data_wbus();
 
 Core core(
     .clk(clk),
@@ -28,13 +28,11 @@ end
 
 always_comb begin
     inst_bus.data = rom[inst_bus.addr[8:2]];
-    inst_bus.aready = 1;
-    inst_bus.ready = 1;
 
     pc = inst_bus.addr;
     waddr = data_wbus.addr;
     wdata = data_wbus.data;
-    wen = data_wbus.avalid;
+    wen = data_wbus.valid;
 end
 
 endmodule

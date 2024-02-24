@@ -4,9 +4,9 @@
 module Core(
     input logic clk,
     input logic rst_n,
-    AXI4LiteReadIF.Master inst_bus,
-    AXI4LiteReadIF.Master data_rbus,
-    AXI4LiteWriteIF.Master data_wbus
+    ReadIF.Master inst_bus,
+    ReadIF.Master data_rbus,
+    WriteIF.Master data_wbus
 );
 import RV32Consts::*;
 
@@ -16,8 +16,7 @@ Instruction inst;
 always_comb begin
     inst_bus.addr = pc;
     inst.inst32 = inst_bus.data;
-    inst_bus.ready = 1;
-    inst_bus.avalid = 1;
+    inst_bus.valid = 1;
 end
 
 MicroCode micro_code;

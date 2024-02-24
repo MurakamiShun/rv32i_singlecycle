@@ -1,6 +1,5 @@
 `include "LoadStoreUnitFuncts.svh"
 `include "RV32Consts.svh"
-`include "AXI4LiteConsts.svh"
 
 module LoadStoreUnit(
     input logic en,
@@ -9,14 +8,14 @@ module LoadStoreUnit(
     input LoadStoreUnitFuncts::Type funct,
     input LoadStoreUnitBytes::Type bytes,
     output RV32Consts::IntReg rdata,
-    AXI4LiteWriteIF.Master w_bus,
-    AXI4LiteReadIF.Master r_bus
+    WriteIF.Master w_bus,
+    ReadIF.Master r_bus
 );
 
 // write bus
 always_comb begin
     w_bus.addr = addr;
-    w_bus.avalid = (en && funct == LoadStoreUnitFuncts::ST);
+    w_bus.valid = (en && funct == LoadStoreUnitFuncts::ST);
     w_bus.data = wdata;
     unique case(bytes)
         LoadStoreUnitBytes::BYTE:begin
@@ -40,8 +39,6 @@ always_comb begin
             w_bus.strb = 4'b0000; // write disable
         end
     endcase
-    w_bus.valid = w_bus.aready & w_bus.ready;
-    w_bus.bready = 1;
 end
 
 // read bus
@@ -61,8 +58,7 @@ always_comb begin
 end
 always_comb begin
     r_bus.addr = {addr[31:2], 2'b0};
-    r_bus.avalid = (en && funct inside {LoadStoreUnitFuncts::LD, LoadStoreUnitFuncts::LDU});
-    r_bus.ready = 1;
+    r_bus.valid = (en && funct inside {LoadStoreUnitFuncts::LD, LoadStoreUnitFuncts::LDU});
     unique case(funct)
         LoadStoreUnitFuncts::LD : begin
             unique case(bytes)
