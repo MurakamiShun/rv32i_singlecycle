@@ -1,7 +1,10 @@
 `include "Instruction.svh"
 `include "MicroCode.svh"
 
-module Core(
+module Core#
+(
+    parameter RST_INST_ADDR = 32'h0
+)(
     input logic clk,
     input logic rst_n,
     ReadIF.Master inst_bus,
@@ -10,7 +13,7 @@ module Core(
 );
 import RV32Consts::*;
 
-IntReg pc = 0;
+IntReg pc = RST_INST_ADDR;
 Instruction inst;
 
 always_comb begin
@@ -121,7 +124,7 @@ end
 
 always_ff@(posedge clk)begin
     if(!rst_n)begin
-        pc <= 0;
+        pc <= RST_INST_ADDR;
     end else if(br_token)begin
         pc <= alu_result;
     end else begin

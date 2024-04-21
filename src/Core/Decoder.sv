@@ -93,7 +93,7 @@ always_comb begin
             micro_code.rd_src = RdSrc::PC4;
             micro_code.alu = '{
                 funct : ALUFuncts::ADD,
-                op1_src : OP1Src::PC,
+                op1_src : OP1Src::RS1,
                 op2_src : OP2Src::IMM,
                 en : 1
             };
@@ -136,8 +136,8 @@ always_comb begin
                 en : 1
             };
             unique case(inst.Itype.funct3[2])
-                1'b1 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LD;
-                1'b0 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LDU;
+                1'b0 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LD;
+                1'b1 : micro_code.ld_st_unit.funct = LoadStoreUnitFuncts::LDU;
             endcase
             unique case(inst.Itype.funct3[1:0])
                 2'b00 : micro_code.ld_st_unit.bytes = LoadStoreUnitBytes::BYTE;

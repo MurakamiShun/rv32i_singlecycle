@@ -1,1 +1,0 @@
-verilator --cc --exe --build -CFLAGS "--std=c++20" TestTop.sv TestTop.cpp -I../src -I../headers -I../src/Core

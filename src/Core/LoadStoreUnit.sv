@@ -15,28 +15,47 @@ module LoadStoreUnit(
 // write bus
 always_comb begin
     w_bus.valid = (en && funct == LoadStoreUnitFuncts::ST);
-    w_bus.addr = w_bus.valid ? addr : 32'h0;
-    w_bus.data = wdata;
+    w_bus.addr = w_bus.valid ? {addr[31:2], 2'b0} : 32'h0;
     unique case(bytes)
         LoadStoreUnitBytes::BYTE:begin
             unique case(addr[1:0])
-                2'b00 : w_bus.strb = 4'b0001;
-                2'b01 : w_bus.strb = 4'b0010;
-                2'b10 : w_bus.strb = 4'b0100;
-                2'b11 : w_bus.strb = 4'b1000;
+                2'b00 : begin
+                    w_bus.strb = 4'b0001;
+                    w_bus.data = {24'b0, wdata[7:0]};
+                end
+                2'b01 : begin
+                    w_bus.strb = 4'b0010;
+                    w_bus.data = {16'b0, wdata[7:0], 8'b0};
+                end
+                2'b10 : begin
+                    w_bus.strb = 4'b0100;
+                    w_bus.data = {8'b0, wdata[7:0], 16'b0};
+                end
+                2'b11 : begin
+                    w_bus.strb = 4'b1000;
+                    w_bus.data = {wdata[7:0], 24'b0};
+                end
             endcase
         end
         LoadStoreUnitBytes::HALF:begin
             unique case(addr[1])
-                1'b0 : w_bus.strb = 4'b0011;
-                1'b1 : w_bus.strb = 4'b1100;
+                1'b0 : begin
+                    w_bus.strb = 4'b0011;
+                    w_bus.data = {16'b0, wdata[15:0]};
+                end
+                1'b1 : begin
+                    w_bus.strb = 4'b1100;
+                    w_bus.data = {wdata[15:0], 16'b0};
+                end
             endcase
         end
         LoadStoreUnitBytes::WORD:begin
             w_bus.strb = 4'b1111;
+            w_bus.data = wdata;
         end
         default : begin
             w_bus.strb = 4'b0000; // write disable
+            w_bus.data = 32'b0;
         end
     endcase
 end
